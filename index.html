@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Treasure Island</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Consolas, "Courier New", monospace;
+        background: #101010;
+        color: #23b523;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #101010;
+      }
+
+      main {
+        min-height: 100vh;
+        padding: 18px 12px;
+      }
+
+      .start-line {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+        font-size: clamp(22px, 4vw, 42px);
+        line-height: 1.35;
+      }
+
+      button {
+        border: 2px solid #bfbfbf;
+        border-radius: 2px;
+        background: #f4f4f4;
+        color: #111;
+        cursor: pointer;
+        font: inherit;
+        line-height: 1;
+        padding: 4px 12px;
+      }
+
+      button:disabled {
+        cursor: default;
+        opacity: 0.65;
+      }
+
+      #terminal {
+        max-width: 1100px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: clamp(15px, 2.3vw, 22px);
+        line-height: 1.35;
+      }
+
+      .input-line {
+        display: none;
+        align-items: center;
+        gap: 8px;
+        max-width: 760px;
+        margin-top: 12px;
+        font-size: clamp(15px, 2.3vw, 22px);
+      }
+
+      .input-line.active {
+        display: flex;
+      }
+
+      label {
+        white-space: nowrap;
+      }
+
+      input {
+        min-width: 140px;
+        flex: 1;
+        border: 0;
+        border-bottom: 2px solid #23b523;
+        outline: 0;
+        background: transparent;
+        color: #23b523;
+        font: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="start-line">
+        <span>Click</span>
+        <button id="run-button" type="button">Run</button>
+        <span>to run the Treasure Island game.</span>
+      </div>
+
+      <pre id="terminal"></pre>
+
+      <form id="answer-form" class="input-line">
+        <label for="answer-input">&gt;</label>
+        <input id="answer-input" autocomplete="off" />
+      </form>
+    </main>
+
+    <script>
+      const runButton = document.querySelector("#run-button");
+      const terminal = document.querySelector("#terminal");
+      const form = document.querySelector("#answer-form");
+      const answerInput = document.querySelector("#answer-input");
+
+      let step = "start";
+
+      function write(text = "") {
+        terminal.textContent += `${text}\n`;
+        window.scrollTo({ top: document.body.scrollHeight });
+      }
+
+      function ask(question) {
+        write(question);
+        form.classList.add("active");
+        answerInput.value = "";
+        answerInput.focus();
+      }
+
+      function end(message) {
+        write(message);
+        form.classList.remove("active");
+        runButton.disabled = false;
+        runButton.textContent = "Run";
+      }
+
+      function startGame() {
+        terminal.textContent = "";
+        step = "choice1";
+        runButton.disabled = true;
+        runButton.textContent = "Running";
+
+        write("Welcome to Treasure Island.");
+        write("Your mission is to find the treasure.");
+        write();
+        ask('You are at a cross road. Where do you want to go? Type "left" or "right"');
+      }
+
+      function handleAnswer(answer) {
+        const choice = answer.trim().toLowerCase();
+        write(`> ${answer}`);
+        write();
+
+        if (step === "choice1") {
+          if (choice === "left") {
+            step = "choice2";
+            ask('You have arrived at a lake with an island in the middle. Would you like to wait for the boat or swim? Type "wait" or "swim"');
+          } else {
+            end("You have lost, Game Over...");
+          }
+
+          return;
+        }
+
+        if (step === "choice2") {
+          if (choice === "wait") {
+            step = "choice3";
+            ask("You arrived at the island and now you have three doors in front of you: red, yellow, and blue. Which door do you choose?");
+          } else {
+            end("You have lost, Game Over...");
+          }
+
+          return;
+        }
+
+        if (step === "choice3") {
+          if (choice === "yellow") {
+            end("You have found the treasure!!! You won!!");
+          } else if (choice === "red" || choice === "blue") {
+            end("GAME OVER");
+          } else {
+            end("You have lost, Game Over...");
+          }
+        }
+      }
+
+      runButton.addEventListener("click", startGame);
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        handleAnswer(answerInput.value);
+      });
+    </script>
+  </body>
+</html>
